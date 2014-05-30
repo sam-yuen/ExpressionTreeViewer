@@ -36,9 +36,11 @@ namespace ExpressionTreeViewer
     {
         protected override void Show(IDialogVisualizerService windowService, IVisualizerObjectProvider objectProvider)
         {
-            var treeForm = new TreeForm();
-            treeForm.RenderExpression((ExpressionTreeNode)objectProvider.GetObject());
-            treeForm.ShowDialog();
+			using (var treeForm = new TreeForm())
+			{
+				treeForm.RenderExpression((ExpressionTreeNode)objectProvider.GetObject());
+				treeForm.ShowDialog();
+			}
         }
     }
 }

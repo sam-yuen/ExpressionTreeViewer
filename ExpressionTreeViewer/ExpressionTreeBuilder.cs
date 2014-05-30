@@ -34,7 +34,7 @@ namespace ExpressionTreeViewer
 			if (expression is ConstantExpression)
 			{
 				var expr = expression as ConstantExpression;
-				node = new ExpressionTreeNode(string.Format("ConstantExpression [{0}]: {1}", expr.Type.FullName, expr.Value));
+				node = new ExpressionTreeNode(string.Format("ConstantExpression [{0}]: {1}", expr.Type, expr.Value));
 			}
 			if (expression is DebugInfoExpression)
 			{
@@ -43,12 +43,12 @@ namespace ExpressionTreeViewer
 			if (expression is DefaultExpression)
 			{
 				var expr = expression as DefaultExpression;
-				node = new ExpressionTreeNode(string.Format("DefaultExpression: [{0}]", expr.Type.FullName));
+				node = new ExpressionTreeNode(string.Format("DefaultExpression: [{0}]", expr.Type));
 			}
 			if (expression is DynamicExpression)
 			{
 				var expr = expression as DynamicExpression;
-				node = new ExpressionTreeNode(string.Format("DynamicExpression [{0}] Arguments:", expr.DelegateType.FullName));
+				node = new ExpressionTreeNode(string.Format("DynamicExpression [{0}] Arguments:", expr.DelegateType));
 				expr.Arguments.ToList().ForEach(a => node.Nodes.Add(GetExpressionTreeNode(a)));
 			}
 			if (expression is GotoExpression)
@@ -78,7 +78,7 @@ namespace ExpressionTreeViewer
 				var args = new ExpressionTreeNode("Arguments:");
 
 				expr.Parameters.ToList().ForEach((item) => args.Nodes.Add(GetExpressionTreeNode(item)));
-				node = new ExpressionTreeNode(string.Format("LambdaExpression [{0}]:", expr.ReturnType.FullName));
+				node = new ExpressionTreeNode(string.Format("LambdaExpression [{0}]:", expr.ReturnType));
 				node.Nodes.Add(args);
 				node.Nodes.Add(GetExpressionTreeNode(expr.Body, "Body"));
 			}
@@ -93,7 +93,8 @@ namespace ExpressionTreeViewer
 			if (expression is MemberExpression)
 			{
 				var expr = expression as MemberExpression;
-				node = new ExpressionTreeNode(string.Format("MemberExpression [{0}]: {1}", expr.Type.FullName, expr.Member.Name));
+				node = new ExpressionTreeNode(string.Format("MemberExpression [{0}]: {1}", expr.Type, expr.Member.Name));
+				node.Nodes.Add(GetExpressionTreeNode(expr.Expression, "Expression"));
 			}
 			if (expression is MemberInitExpression)
 			{
@@ -121,7 +122,7 @@ namespace ExpressionTreeViewer
 			if (expression is ParameterExpression)
 			{
 				var expr = expression as ParameterExpression;
-				node = new ExpressionTreeNode(string.Format("ParameterExpression [{0}]: {1}", expr.Type.FullName, expr.Name));
+				node = new ExpressionTreeNode(string.Format("ParameterExpression [{0}]: {1}", expr.Type, expr.Name));
 			}
 			if (expression is RuntimeVariablesExpression)
 			{
@@ -148,7 +149,7 @@ namespace ExpressionTreeViewer
 				node.Nodes.Add(GetExpressionTreeNode(expr.Operand));
 			}
 			if (node == null)
-				node = new ExpressionTreeNode(string.Format("Unkown Node [{0}-{1}]: {2}", expression.GetType().FullName, expression.NodeType, expression));
+				node = new ExpressionTreeNode(string.Format("Unkown Node [{0}-{1}]: {2}", expression.GetType(), expression.NodeType, expression));
 			if (prefix != null)
 				node.Text = string.Format("{0} => {1}", prefix, node.Text);
 			node.ExpressionString = expression.ToString();
