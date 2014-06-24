@@ -26,10 +26,7 @@ namespace ExpressionTreeViewer
 			if (expression is ConditionalExpression)
 			{
 				var expr = expression as ConditionalExpression;
-				node = new ExpressionTreeNode(string.Format("ConditionalExpression: [{0}]", expr.NodeType));
-				node.Nodes.Add(GetExpressionTreeNode(expr.Test, "Test"));
-				node.Nodes.Add(GetExpressionTreeNode(expr.IfTrue, "IfTrue"));
-				node.Nodes.Add(GetExpressionTreeNode(expr.IfFalse, "IfFalse"));
+				node = new ExpressionTreeNode(string.Format("ConditionalExpression: [{0}]", expr));
 			}
 			if (expression is ConstantExpression)
 			{
