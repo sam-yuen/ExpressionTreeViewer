@@ -26,7 +26,10 @@ namespace ExpressionTreeViewer
 			if (expression is ConditionalExpression)
 			{
 				var expr = expression as ConditionalExpression;
-				node = new ExpressionTreeNode(string.Format("ConditionalExpression: [{0}]", expr));
+				node = new ExpressionTreeNode(string.Format("ConditionalExpression: [{0}]", expr.Type));
+				node.Nodes.Add(GetExpressionTreeNode(expr.Test, "Test"));
+				node.Nodes.Add(GetExpressionTreeNode(expr.IfTrue, "IfTrue"));
+				node.Nodes.Add(GetExpressionTreeNode(expr.IfFalse, "IfFalse"));
 			}
 			if (expression is ConstantExpression)
 			{
@@ -61,9 +64,12 @@ namespace ExpressionTreeViewer
 			if (expression is InvocationExpression)
 			{
 				var expr = expression as InvocationExpression;
-				node = new ExpressionTreeNode(string.Format("InvocationExpression [{0}] Arguments:", expr.Expression));
-				expr.Arguments.ToList().ForEach(a => node.Nodes.Add(GetExpressionTreeNode(a)));
+				var argsNode = new ExpressionTreeNode(string.Format("Arguments: {0}", expr.Arguments.Count));
+
+				expr.Arguments.ToList().ForEach(a => argsNode.Nodes.Add(GetExpressionTreeNode(a)));
+				node = new ExpressionTreeNode(string.Format("InvocationExpression [{0}]:", expr.Type));
 				node.Nodes.Add(GetExpressionTreeNode(expr.Expression, "Expression"));
+				node.Nodes.Add(argsNode);
 			}
 			if (expression is LabelExpression)
 			{
@@ -72,11 +78,11 @@ namespace ExpressionTreeViewer
 			if (expression is LambdaExpression)
 			{
 				var expr = expression as LambdaExpression;
-				var args = new ExpressionTreeNode("Arguments:");
+				var argsNode = new ExpressionTreeNode("Arguments:");
 
-				expr.Parameters.ToList().ForEach((item) => args.Nodes.Add(GetExpressionTreeNode(item)));
+				expr.Parameters.ToList().ForEach((item) => argsNode.Nodes.Add(GetExpressionTreeNode(item)));
 				node = new ExpressionTreeNode(string.Format("LambdaExpression [{0}]:", expr.ReturnType));
-				node.Nodes.Add(args);
+				node.Nodes.Add(argsNode);
 				node.Nodes.Add(GetExpressionTreeNode(expr.Body, "Body"));
 			}
 			if (expression is ListInitExpression)
@@ -96,8 +102,25 @@ namespace ExpressionTreeViewer
 			if (expression is MemberInitExpression)
 			{
 				var expr = expression as MemberInitExpression;
-				node = new ExpressionTreeNode(string.Format("MemberInitExpression [{0}]:", expr.NewExpression.Type));
-				expr.Bindings.ToList().ForEach(b => node.Nodes.Add(new ExpressionTreeNode(b.ToString())));
+				var child = new ExpressionTreeNode(string.Format("Bindings: {0}", expr.Bindings.Count));
+
+				expr.Bindings.ToList().ForEach(binding =>
+				{
+					if (binding.BindingType == MemberBindingType.Assignment)
+					{
+						var assigment = (MemberAssignment)binding;
+						var child2 = new ExpressionTreeNode(string.Format("{0}: {1}", assigment.BindingType, assigment.Member));
+						child.Nodes.Add(child2);
+						child2.Nodes.Add(GetExpressionTreeNode(assigment.Expression, "Expression"));
+					}
+					else
+					{
+						child.Nodes.Add(new ExpressionTreeNode(binding.BindingType + ": " + binding));
+					}
+				});
+				node = new ExpressionTreeNode(string.Format("MemberInitExpression [{0}]:", expr.Type));
+				node.Nodes.Add(GetExpressionTreeNode(expr.NewExpression, "NewExpression"));
+				node.Nodes.Add(child);
 			}
 			if (expression is MethodCallExpression)
 			{
@@ -145,11 +168,25 @@ namespace ExpressionTreeViewer
 				node = new ExpressionTreeNode(string.Format("UnaryExpression [{0}] Operand:", expr.NodeType));
 				node.Nodes.Add(GetExpressionTreeNode(expr.Operand));
 			}
+
 			if (node == null)
-				node = new ExpressionTreeNode(string.Format("Unkown Node [{0}-{1}]: {2}", expression.GetType(), expression.NodeType, expression));
-			if (prefix != null)
+			{
+				if (expression != null)
+				{
+					node = new ExpressionTreeNode(string.Format("Unkown Node [{0}-{1}]: {2}", expression.GetType(), expression.NodeType, expression));
+				}
+				else
+				{
+					node = new ExpressionTreeNode("NULL");
+				}
+			}
+
+			if (!string.IsNullOrEmpty(prefix))
+			{
 				node.Text = string.Format("{0} => {1}", prefix, node.Text);
-			node.ExpressionString = expression.ToString();
+			}
+
+			node.ExpressionString = expression + string.Empty;
 			return node;
 		}
 	}
